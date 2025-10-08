@@ -14,9 +14,12 @@
         android:text="Pay Calculator"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:textAlignment="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_hours"
