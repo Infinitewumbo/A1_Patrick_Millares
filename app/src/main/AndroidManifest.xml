@@ -22,7 +22,7 @@
         </activity>
 
         <activity
-            android:name=".DetailActivity"
+            android:name=".DetailsActivity"
             android:exported="false"
             android:label="Payment History"
             android:parentActivityName=".MainActivity">
