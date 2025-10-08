@@ -1,6 +1,8 @@
 package com.example.comp3074_assignment1;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,13 +19,20 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText editHours, editRate;
     private TextView textPay, textOvertimePay, textTotalPay, textTax;
     private Button btnCalculate;
+
+    private static final String PREFS_NAME = "PaymentPrefs";
+    private static final String KEY_PAYMENT_LIST = "PaymentList";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,5 +124,53 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Success: Payment calculated and logged!", Toast.LENGTH_SHORT).show();
     }
 
+    private void logPaymentEntry(double hours, double rate, double totalPay, double tax) {
+        try {
+            // Load existing list
+            ArrayList<String> paymentList = loadPaymentEntries();
+            DecimalFormat df = new DecimalFormat("0.00");
 
+            // Create a formatted string entry
+            String newEntry = String.format("Hours: %.2f, Rate: $%.2f, Total Pay: $%s, Tax: $%s",
+                    hours, rate, df.format(totalPay), df.format(tax));
+
+            // Add the new entry to the list
+            paymentList.add(newEntry);
+
+            // Convert the list back to a JSON Array string for storage
+            JSONArray jsonArray = new JSONArray(paymentList);
+
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(KEY_PAYMENT_LIST, jsonArray.toString());
+            editor.apply();
+
+        } catch (Exception e) {
+            // Log error if JSON processing fails
+            e.printStackTrace();
+            Toast.makeText(this, "Error logging payment data.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static ArrayList<String> loadPaymentEntries(Context context) {
+        ArrayList<String> paymentList = new ArrayList<>();
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String jsonList = prefs.getString(KEY_PAYMENT_LIST, null);
+
+        if (jsonList != null) {
+            try {
+                JSONArray jsonArray = new JSONArray(jsonList);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    paymentList.add(jsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return paymentList;
+    }
+
+    private ArrayList<String> loadPaymentEntries() {
+        return loadPaymentEntries(this);
+    }
 }
